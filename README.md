@@ -1,151 +1,72 @@
 # Win7-on-Termux (Manager v4)
 
-Enterprise-Style Portable Virtualization Environment for Running Windows 7 on Android (ARM64) Using Termux and QEMU
+Portable virtualization management framework for running Windows 7 x64 on Android (ARM64) using QEMU and Termux.
 
 ---
 
 ## Overview
 
-Win7-on-Termux (Manager v4) is a structured virtualization management environment designed to run a Windows 7 x86_64 virtual machine on ARM64 Android devices via QEMU.
+Win7-on-Termux (Manager v4) provides an automated environment to deploy and manage a Windows 7 x86_64 virtual machine on ARM64 Android devices.
 
-The project focuses on:
-
-- Automation
-- Stability
-- Resource optimization
-- Storage safety
-- Portability
-- Controlled system scaling
-
-This repository does not distribute Windows binaries. It provides a management framework for users who legally possess their own Windows installation media.
+This repository does NOT distribute Windows binaries.  
+Users must supply their own legally obtained installation media.
 
 ---
 
-## Core Capabilities
+## Key Features
 
-### 1. Dynamic Resource Management
-
-The manager script automatically:
-
-- Detects total system RAM
-- Detects total CPU cores
-- Allocates 40% of RAM to the VM
-- Allocates (Total Cores - 1)
-
-This ensures Android host stability while maximizing VM performance.
+- Automatic RAM allocation (40% of total memory)
+- Automatic CPU allocation (Total Cores - 1)
+- QCOW2 stored in /sdcard/ for persistence
+- Dependency auto-installation
+- Automatic cleanup of conflicting QEMU processes
+- Optional disk resizing support
 
 ---
 
-### 2. Storage Isolation & Protection
+## Requirements
 
-The QCOW2 virtual disk is stored in:
-
-/sdcard/
-
-A symbolic link maps it into the project directory.
-
-Benefits:
-
-- Survives Termux uninstall/reset
-- Prevents accidental image deletion
-- Improves data safety
-
----
-
-### 3. Automated Dependency Provisioning
-
-On first execution, the script:
-
-- Checks for required packages
-- Installs missing dependencies (QEMU, supporting libraries)
-- Ensures a consistent runtime environment
-
----
-
-### 4. Process Hygiene
-
-Before launching the VM, the manager:
-
-- Detects ghost QEMU processes
-- Terminates conflicting instances
-- Prevents VNC/socket port conflicts
-
----
-
-## System Requirements
-
-- Android ARM64 device
+- ARM64 Android device
 - Termux (F-Droid recommended)
-- VNC Viewer application
-- Windows 7 x64 ISO or QCOW2 image
+- VNC Viewer
+- Windows 7 x64 ISO or QCOW2 image (legally obtained)
 - Minimum 20GB free internal storage
 
-Storage Note:
-
-Although the base QCOW2 file is ~7.16GB, it is dynamically allocated and may expand up to 16GB or more during usage.
-
-Insufficient storage may cause VM failure or data corruption.
+Note:
+QCOW2 is dynamically allocated.  
+Although initial size may be ~7GB, it can expand up to 16GB or more.
 
 ---
 
-## ISO Source (Development Reference)
+## ISO to QCOW2 Conversion Summary
 
-During development and testing, the ISO used was:
+The development image was created from a clean Windows 7 Professional SP1 x64 ISO.
 
-Archive Page:
-https://archive.org/details/win-7-pro-sp1-english
-
-Direct ISO:
-https://archive.org/download/win-7-pro-sp1-english/Win7_Pro_SP1_English_x64.iso
-
-This reference is provided for transparency only.
-
-Users are responsible for ensuring legal eligibility to download and use Microsoft software in their jurisdiction.
-
----
-
-## Build Methodology (ISO to QCOW2)
-
-This environment was built from a clean ISO installation.
-
-### Phase 1 — Disk Creation
+### Step 1 — Create Virtual Disk
 
 qemu-img create -f qcow2 win7.qcow2 20G
 
-QCOW2 was selected because:
-
-- It is thin-provisioned
-- Expands only as data is written
-- Efficient for mobile storage constraints
+QCOW2 was chosen for thin-provisioned storage efficiency.
 
 ---
 
-### Phase 2 — ISO Installation
+### Step 2 — Install from ISO
 
-ISO mounted using:
-
-- -cdrom
-- -boot d
-
-USB controller added:
-
--device usb-ehci
-
-Display method switched to:
-
--vnc :1
-
-This avoided Termux-X11 socket conflicts.
+- Mounted ISO using -cdrom
+- Boot priority set using -boot d
+- Added USB controller:
+  -device usb-ehci
+- Switched display to:
+  -vnc :1
 
 ---
 
-### Phase 3 — Windows Setup Loop Resolution
+### Step 3 — Resolve Setup Loop
 
-Encountered known Windows 7 + QEMU compatibility issue:
+If Windows displays:
+"The computer restarted unexpectedly"
 
-"The computer restarted unexpectedly."
-
-Resolution:
+Fix:
 
 Shift + F10  
 Run regedit  
@@ -154,99 +75,67 @@ Navigate to:
 HKEY_LOCAL_MACHINE\SYSTEM\Setup\Status\ChildCompletion
 
 Change:
-
 setup.exe = 1 → 3
 
 This forces setup completion.
 
 ---
 
-### Phase 4 — Optimization
+### Step 4 — Optimization
 
-Applied performance improvements:
+Applied:
 
-- Switched to Windows Classic theme
-- Disabled Windows Search Indexer
+- Windows Classic theme
+- Disabled Search Indexer
 - Disabled Windows Updates
-- Upgraded CPU model to:
-  -cpu core2duo
-- Enabled disk cache:
-  -cache=writeback
+- -cpu core2duo
+- -cache=writeback
 
 ---
 
-### Phase 5 — Automation & Scaling
+### Step 5 — Manager Automation
 
-Converted manual configuration into automated manager system:
+Converted static install into managed environment:
 
-- QCOW2 moved to /sdcard/
-- RAM/CPU dynamically calculated
-- Optional disk resize supported (20GB → 64GB)
-
----
-
-## Legal & Compliance Statement
-
-1. This repository does NOT distribute:
-   - Windows ISO files
-   - Windows product keys
-   - Activation tools
-   - Cracks or bypass utilities
-
-2. No product key was used, distributed, embedded, or provided within this project.
-
-3. The virtual environment is provided for:
-   - Educational purposes
-   - Virtualization research
-   - System experimentation
-
-4. Users are solely responsible for:
-   - Licensing compliance
-   - Activation status
-   - Legal use of Microsoft software
-
-5. The author assumes no liability for:
-   - License violations
-   - Misuse
-   - Data loss
-   - Hardware damage
+- Moved QCOW2 to /sdcard/
+- Automated RAM/CPU detection
+- Added optional disk resize (20GB → 64GB)
 
 ---
 
-## Security & Transparency
+## Legal & Distribution Policy
 
-- The QCOW2 image is built from a clean ISO installation.
-- No external binaries are injected.
-- No hidden activation scripts exist.
-- No remote access services are embedded.
-- No telemetry modifications were performed beyond standard Windows configuration changes.
+This repository does NOT provide:
 
-If desired, users may reproduce the build process manually using the ISO and steps documented above.
+- Windows ISO files
+- QCOW2 images
+- Product keys
+- Activation tools
+- Licensing bypass methods
 
----
+No product key was used, embedded, or distributed.
 
-## Architecture Summary
+Users must ensure:
 
-Termux = Host Runtime Environment  
-QEMU = Virtualization Engine  
-VNC Viewer = Display Interface  
-win7_manager.sh = Control Layer  
+- They possess valid Windows licensing
+- They comply with software laws in their jurisdiction
+- They have appropriate hardware and storage resources
 
 ---
 
 ## Limitations
 
-- Emulation performance depends heavily on device hardware.
-- Windows 7 is legacy software and no longer supported by Microsoft.
+- Windows 7 is legacy software.
 - ARM64 → x86_64 emulation is CPU intensive.
-- Not suitable for gaming or heavy GPU workloads.
+- Performance depends on device specifications.
+- Not intended for GPU-heavy workloads.
 
 ---
 
 ## Disclaimer
 
-This project is provided “as-is” without warranty of any kind.
+Provided for educational and research purposes only.
 
 Use at your own risk.
 
-Ensure you comply with all applicable software licensing laws in your country.
+The author assumes no liability for misuse, licensing violations, or data loss.
